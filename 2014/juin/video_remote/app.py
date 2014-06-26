@@ -9,7 +9,7 @@ import uuid
 # est ce qui lie tous les éléments
 # de notre code ensemble. On lui donne
 # un nom, ici "demo"
-app = Application('demo')
+app = Application('io.crossbar.demo.videocontroller')
 # Bien que l'app va démarrer un serveur
 # pour nous, l'app est bien un CLIENT
 # du serveur WAMP. Le serveur démarré
@@ -43,9 +43,9 @@ def _():
 # via RCP. Ce qui veut dire que tout autre client
 # WAMP peut obtenir le résultat de cette fonction.
 # Donc on va pouvoir l'appeler depuis notre navigateur.
-# Comme notre app s'appelle "demo" et notre fonction
+# Comme notre app s'appelle "io.crossbar.demo.videocontroller" et notre fonction
 # s'appelle "ip", un client pourra l'appeler en faisant
-# "demo.ip".
+# "io.crossbar.demo.videocontroller.ip".
 @app.register()
 def ip():
    # On ne fait que retourner l'IP locale. Rien de fou.
@@ -55,11 +55,11 @@ def ip():
 # override le module Python uuid. Ce n'est pas une bonne
 # idée. Je l'appelle donc 'get_uuid' mais je déclare le
 # nom complet dans register(). Un client WAMP pourra donc
-# bien l'appeler via "demo.uuid".
+# bien l'appeler via "io.crossbar.demo.videocontroller.uuid".
 # Notez que ce namespace doit toujours s'écrire
 # truc.machine.bidule. Pas truc/machin ou truc:machin.
 # ou truc et bidule.MACHIN.
-@app.register('demo.uuid')
+@app.register('io.crossbar.demo.videocontroller.uuid')
 def get_uuid():
    # Retourne un UUID, sans les tirets.
    # ex: b27f7e9360c04efabfae5ac21a8f4e3c
@@ -68,7 +68,8 @@ def get_uuid():
 # On lance l'application. Ceci va lancer le serveur
 # puis le client. On peut désactiver le lancement du
 # serveur une fois qu'on met tout ça en prod.
-app.run()
-# On ne peut rien mettre comme code ici, il faut le
-# mettre dans @app.signal('onjoined') si on veut
-# entrer du code après que l'app soit lancée.
+if __name__ == "__main__":
+   app.run()
+   # On ne peut rien mettre comme code ici, il faut le
+   # mettre dans @app.signal('onjoined') si on veut
+   # entrer du code après que l'app soit lancée.

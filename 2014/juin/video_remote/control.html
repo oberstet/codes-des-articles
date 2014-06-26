@@ -3,7 +3,7 @@
 <head>
   <title>Télécommande</title>
   <meta charset='utf-8'>
-  <script src="http://autobahn.ws/static/deps/autobahn.js"
+  <script src="https://autobahn.s3.amazonaws.com/autobahnjs/latest/autobahn.min.jgz"
          type="text/javascript"></script>
   <style type="text/css">
     #controls {
@@ -58,12 +58,26 @@ var control = {
    }
 };
 window.onload = function(){
+  // the URL of the WAMP Router (Crossbar.io)
+  //
+  var wsuri;
+  if (document.location.origin == "file://") {
+    wsuri = "ws://127.0.0.1:8080/ws";
+  } else {
+    wsuri = (document.location.protocol === "http:" ? "ws:" : "wss:") + "//" +
+               document.location.host + "/ws";
+  }
+
   var connection = new autobahn.Connection({
-    url: 'ws://localhost:8080/',
+    url: wsuri,
     realm: 'realm1'
   });
 
   connection.onopen = function (session) {
+
+    console.log("connected");
+
+    session.prefix('demo', 'io.crossbar.demo.videocontroller');
 
     /* Récupération de l'ID dans le hash de l'URL */
     var uuid = window.location.hash.replace('#', '');
@@ -71,7 +85,7 @@ window.onload = function(){
     /* Mise à jour des controles selon le status actuel
        du player grace à un appel RPC vers notre autre
        page. */
-    session.call(uuid + '.status').then(function(status){
+    session.call('demo:' + uuid + '.status').then(function(status){
 
       control.setPlaying(status['playing']);
       control.setVolume(status['volume'])
@@ -83,29 +97,29 @@ window.onload = function(){
          bon player. */
       control.togglePlay = function() {
         if (control.playing){
-          session.call(uuid + '.pause');
+          session.call('demo:' + uuid + '.pause');
         } else {
-          session.call(uuid + '.play');
+          session.call('demo:' + uuid + '.play');
         }
       };
 
       control.volume = function(val){
-        session.call(uuid + '.volume', [val / 100]);
+        session.call('demo:' + uuid + '.volume', [val / 100]);
       };
 
       /* On ajoute un callback sur les événements
          de changement de status du player. Si
          quelqu'un fait play/pause ou change le
          volume, on veut mettre à jour la page. */
-      session.subscribe(uuid + '.play', function(){
+      session.subscribe('demo:' + uuid + '.play', function(){
         control.setPlaying(true);
       });
 
-      session.subscribe(uuid + '.pause', function(){
+      session.subscribe('demo:' + uuid + '.pause', function(){
         control.setPlaying(false);
       });
 
-      session.subscribe(uuid + '.volume', function(val){
+      session.subscribe('demo:' + uuid + '.volume', function(val){
         control.setVolume(val[0] * 100);
       });
     });
