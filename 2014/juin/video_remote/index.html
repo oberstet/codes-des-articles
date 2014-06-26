@@ -110,8 +110,8 @@
          projet et on appelle la fonction
          get_uuid() du serveur */
       .then(function(ip){
-        //url = 'http://' + ip + ':8000'; // unneeded?
-        url = document.location.origin;
+        url = 'http://' + ip + ':8080';
+        //url = document.location.origin;
         return session.call('demo:uuid');
       })
 
